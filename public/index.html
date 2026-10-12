@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8edf0">
+  <title>A little question for you</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swacp" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; --ink:#39232f; --rose:#b64e69; --paper:#fffaf5; }
+    * { box-sizing: border-box; }
+    body { min-height:100vh; margin:0; display:grid; place-items:center; overflow:hidden; color:var(--ink); font-family:"DM Sans",sans-serif; background:radial-gradient(ellipse at 50% 42%,#fffaf9 0%,#f7e8ec 65%,#f0dfe5 100%); }
+    .glow { position:fixed; width:520px; height:520px; border-radius:50%; background:#fff; filter:blur(95px); opacity:.42; pointer-events:none; }
+    .petal { position:fixed; z-index:0; color:#c88193; opacity:.28; animation:drift 9s ease-in-out infinite; user-select:none; }
+    .p1 { left:12%; top:17%; font-size:28px; } .p2 { right:13%; top:27%; font-size:19px; animation-delay:-3s; } .p3 { left:20%; bottom:17%; font-size:21px; animation-delay:-6s; } .p4 { right:19%; bottom:15%; font-size:30px; animation-delay:-1.5s; }
+    main { position:relative; z-index:1; width:min(92vw,620px); min-height:590px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:38px 22px; }
+    .eyebrow { margin:0 0 12px; color:#94616f; font-size:11px; font-weight:700; letter-spacing:.24em; text-transform:uppercase; }
+    h1 { margin:0; font-family:"Playfair Display",serif; font-size:clamp(38px,7vw,60px); font-weight:500; letter-spacing:-.035em; line-height:1.08; }
+    .intro { max-width:370px; margin:14px auto 3px; color:#785c65; font-size:15px; line-height:1.7; }
+    .envelope-wrap { position:relative; width:min(360px,82vw); height:240px; margin:34px auto 16px; cursor:pointer; outline:none; perspective:1000px; }
+    .envelope { position:absolute; inset:32px 0 0; height:190px; border-radius:8px; background:#ce8291; box-shadow:0 23px 45px #9c56623b,0 3px 8px #7e374226; transition:transform .65s cubic-bezier(.2,.75,.25,1), opacity .55s, filter .55s; }
+    .env-back { position:absolute; inset:0; overflow:hidden; border-radius:8px; background:#d997a2; }
+    .env-back:before,.env-back:after { content:""; position:absolute; bottom:0; width:0; height:0; border-style:solid; }
+    .env-back:before { left:0; border-width:95px 180px 0 0; border-color:transparent #d18494 transparent transparent; }
+    .env-back:after { right:0; border-width:95px 0 0 180px; border-color:transparent transparent transparent #d18494; }
+    .pocket { position:absolute; inset:0; background:linear-gradient(140deg,transparent 49.5%,#bd7081 50%) bottom left/50% 100% no-repeat,linear-gradient(220deg,transparent 49.5%,#c47889 50%) bottom right/50% 100% no-repeat; clip-path:polygon(0 100%,50% 43%,100% 100%); }
+    .flap { position:absolute; z-index:3; left:0; top:0; width:100%; height:100px; background:#dca0aa; clip-path:polygon(0 0,100% 0,50% 100%); transform-origin:top; transition:transform .65s cubic-bezier(.2,.75,.25,1); }
+    .letter { position:absolute; z-index:2; left:6%; top:16px; width:88%; min-height:194px; padding:25px 19px 19px; border:1px solid #eedbd4; border-radius:5px; background:var(--paper); box-shadow:0 5px 18px #54303c18; transition:transform .65s .12s cubic-bezier(.2,.75,.25,1); }
+    .letter-kicker { margin:0 0 10px; color:#a66b77; font-size:10px; font-weight:700; letter-spacing:.19em; text-transform:uppercase; }
+    .letter h2 { margin:0 auto 18px; max-width:290px; font-family:"Playfair Display",serif; font-size:27px; font-weight:500; line-height:1.2; }
+    .yes { border:0; border-radius:999px; padding:11px 24px; background:var(--rose); color:white; font:600 14px "DM Sans",sans-serif; cursor:pointer; box-shadow:0 5px 12px #b64e6935; transition:transform .18s,background .18s; }
+    .yes:hover { transform:translateY(-2px); background:#a8415b; } .yes:focus-visible,.envelope-wrap:focus-visible { outline:3px solid #6e3348; outline-offset:5px; }
+    .hint { margin:0; color:#9b7880; font-size:12px; letter-spacing:.03em; transition:opacity .25s; }
+    .envelope-wrap.open .flap { transform:rotateX(180deg); z-index:1; }
+    .envelope-wrap.open .letter { transform:translateY(-91px); z-index:4; }
+    .envelope-wrap.open .envelope { transform:translateY(45px); }
+    .envelope-wrap.answered { cursor:default; }
+    .envelope-wrap.answered .envelope { transform:translateY(85px) scale(.9); opacity:.18; filter:blur(2px); }
+    .envelope-wrap.answered .letter { transform:translateY(-12px) scale(1.04); box-shadow:0 20px 45px #54303c22; }
+    .envelope-wrap.answered .flap { opacity:0; }
+    .success { display:none; position:relative; z-index:5; margin:-17px 0 4px; animation:appear .65s both; }
+    .success.show { display:block; }
+    .success .sparkle { display:block; margin-bottom:8px; color:#b64e69; font-size:24px; }
+    .success h2 { margin:0; font-family:"Playfair Display",serif; font-size:clamp(27px,5vw,38px); font-weight:500; line-height:1.2; }
+    .success p { margin:9px 0 0; color:#805d68; font-size:14px; }
+    .footer { position:absolute; bottom:15px; color:#aa8790; font-size:11px; letter-spacing:.12em; }
+    @keyframes drift { 50% { transform:translateY(-13px) rotate(12deg); } }
+    @keyframes appear { from { opacity:0; transform:translateY(12px) scale(.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @media(max-height:700px) { main { min-height:520px; transform:scale(.9); } }
+    @media(prefers-reduced-motion:reduce) { *,*:before,*:after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <span class="petal p1" aria-hidden="true">✿</span><span class="petal p2" aria-hidden="true">✧</span><span class="petal p3" aria-hidden="true">♡</span><span class="petal p4" aria-hidden="true">✿</span>
+  <main>
+    <p class="eyebrow">Un pequeño regalalito para ti</p>
+    <h1>Hey, tú, Fercito.</h1>
+    <p class="intro">Hay algo que llevo mucho tiempo queriendo preguntarte.<br>Abre esto cuando estés listo ♡</p>
+
+    <div class="envelope-wrap" id="envelope" role="button" tabindex="0" aria-label="Open the envelope">
+      <div class="envelope" aria-hidden="true">
+        <div class="env-back"></div>
+        <div class="letter">
+          <p class="letter-kicker">De Juan, desde el fondo de su corazon</p>
+          <h2>¿Quieres ser mi novio?</h2>
+          <button class="yes" id="yesButton" type="button">Si, obvio que si ♡</button>
+        </div>
+        <div class="pocket"></div>
+        <div class="flap"></div>
+      </div>
+    </div>
+    <p class="hint" id="hint">Toca el sobre para abrir la carta</p>
+    <section class="success" id="success" aria-live="polite">
+      <span class="sparkle" aria-hidden="true">✦ &nbsp; ♡ &nbsp; ✦</span>
+      <h2>Ahora te declaro a ti, y a Juan<br>novios! ♡</h2>
+      <p>Esto es para nosotros. Estoy muy feliz de que seas tú.</p>
+    </section>
+    <footer class="footer">HECHO CON MUCHO AMOR</footer>
+  </main>
+  <script>
+    const envelope = document.querySelector('#envelope');
+    const hint = document.querySelector('#hint');
+    const success = document.querySelector('#success');
+    const yesButton = document.querySelector('#yesButton');
+    let answered = false;
+
+    function openEnvelope() {
+      if (answered || envelope.classList.contains('open')) return;
+      envelope.classList.add('open');
+      envelope.setAttribute('aria-label', 'Your letter is open');
+      hint.textContent = 'Una pregunta, solo para ti ♡';
+    }
+
+    function showYes() {
+      answered = true;
+      envelope.classList.add('open', 'answered');
+      envelope.setAttribute('aria-label', 'You said yes!');
+      hint.hidden = true;
+      yesButton.hidden = true;
+      success.classList.add('show');
+    }
+
+    envelope.addEventListener('click', (event) => {
+      if (event.target.closest('button')) return;
+      openEnvelope();
+    });
+    envelope.addEventListener('keydown', (event) => {
+      if (event.target === envelope && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        openEnvelope();
+      }
+    });
+    yesButton.addEventListener('click', async () => {
+      try {
+        await fetch('/api/answer', { method: 'POST' });
+      } catch (error) {
+        // Still show the happy state if temporarily offline; the server records it when reachable.
+      }
+      showYes();
+    });
+
+    fetch('/api/answer', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then(({ saidYes }) => { if (saidYes) showYes(); })
+      .catch(() => {});
+  </script>
+</body>
+</html>
